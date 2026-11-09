@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>نشاط الطالب الحركي: طابق وحرّك</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--ink:#1c2740;--mute:#5b6580;--line:#d9deea;--acc:#0e7c7b;--accbg:#dff3f2;--ok:#1b7a3d;--okbg:#e3f5e8;--bad:#b3261e;--badbg:#fdebea;--warm:#b7791f;--warmbg:#fbf0d9;--onacc:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121826;--card:#1b2438;--ink:#e8ecf6;--mute:#a3adc6;--line:#2f3b57;--acc:#4fd1c5;--accbg:#173b3d;--ok:#6ee7a0;--okbg:#17352a;--bad:#ff8a80;--badbg:#3d1f21;--warm:#f6c453;--warmbg:#3b3018;--onacc:#0b1f20}}
+:root[data-theme="dark"]{--bg:#121826;--card:#1b2438;--ink:#e8ecf6;--mute:#a3adc6;--line:#2f3b57;--acc:#4fd1c5;--accbg:#173b3d;--ok:#6ee7a0;--okbg:#17352a;--bad:#ff8a80;--badbg:#3d1f21;--warm:#f6c453;--warmbg:#3b3018;--onacc:#0b1f20}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Tajawal",system-ui,sans-serif;line-height:1.7;font-size:17px}
+main{max-width:760px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:1.5rem;margin:0 0 4px}
+h2{font-size:1.15rem;margin:0 0 8px}
+p{margin:0 0 10px}
+.sub{color:var(--mute);margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+.bar{height:10px;background:var(--line);border-radius:5px;overflow:hidden;margin:6px 0 14px}
+.bar i{display:block;height:100%;background:var(--acc);width:0;transition:width .3s}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.col h3{font-size:.95rem;color:var(--mute);margin:0 0 8px;font-weight:500}
+.slot{min-height:78px;border:2px dashed var(--line);border-radius:10px;padding:10px;margin-bottom:10px;background:var(--card);cursor:pointer;display:flex;flex-direction:column;justify-content:center;gap:4px}
+.slot b{font-weight:700}
+.slot.over{border-color:var(--acc);background:var(--accbg)}
+.slot.done{border:2px solid var(--ok);background:var(--okbg);cursor:default}
+.slot.shake{border-color:var(--bad);background:var(--badbg)}
+.slot .m{font-weight:400;color:var(--mute);font-size:.95rem}
+.slot.done .m{color:var(--ink)}
+.pick{padding:12px 10px;border:2px solid var(--warm);background:var(--warmbg);color:var(--ink);border-radius:10px;margin-bottom:10px;cursor:grab;font:inherit;width:100%;text-align:right;min-height:78px}
+.pick.sel{outline:3px solid var(--acc);outline-offset:2px}
+.pick.gone{display:none}
+.fb{min-height:30px;margin:6px 0;font-weight:500}
+.fb.ok{color:var(--ok)}.fb.bad{color:var(--bad)}
+.btn{padding:10px 18px;border:0;border-radius:10px;background:var(--acc);color:var(--onacc);font:inherit;font-weight:700;cursor:pointer}
+label.ck{display:flex;gap:10px;align-items:flex-start;padding:8px 0;cursor:pointer}
+label.ck input{margin-top:7px;width:20px;height:20px;accent-color:var(--acc)}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+@media (max-width:480px){.grid{gap:8px}.pick,.slot{padding:8px;font-size:.95rem}}
+</style>
+</head>
+<body>
+<main>
+<h1>طابق وحرّك</h1>
+<p class="sub">معايير تقييم كائنات التعلم التفاعلية</p>
+
+<div class="card">
+<h2>الخطوة الأولى: اربط المعيار بمعناه</h2>
+<p>اسحب بطاقة المعنى إلى المعيار الصحيح، أو المس البطاقة ثم المس المعيار.</p>
+<div class="bar"><i id="pb"></i></div>
+<div class="grid">
+<div class="col"><h3>المعايير</h3><div id="slots"></div></div>
+<div class="col"><h3>المعاني</h3><div id="picks"></div></div>
+</div>
+<div class="fb" id="fb" aria-live="polite"></div>
+<button class="btn" id="reset">ابدأ من جديد</button>
+</div>
+
+<div class="card">
+<h2>الخطوة الثانية: ارسم شاشتك</h2>
+<p>خذ ورقة وقلمًا، وارسم شاشة واحدة لكائن تعلم عن أي درس تحبه. ضع علامة عند كل شيء رسمته.</p>
+<div id="todo"></div>
+</div>
+</main>
+<script>
+var P=[["جودة المحتوى","المعلومات صحيحة وواضحة ومرتبة"],["أهداف التعلم","الكائن يحقق هدفًا واحدًا واضحًا"],["التغذية الراجعة والتفاعل","يخبرني لماذا أخطأت، ويتيح لي التقدم والرجوع"],["التحفيز والدافعية","نقاط وشارات وألعاب تشجعني"],["تصميم العرض البصري","خط واضح، وألوان متباينة، وصور بسيطة"],["سهولة التفاعل","أيقونات واضحة وتنقل بسيط"]];
+var T=["عنوان يوضح ماذا سأتعلم","صورة بسيطة بلا تفاصيل مشتتة","نص قصير بخط كبير واضح","زر «التالي» وزر «السابق»","سؤال صغير أختار إجابته","رسالة تشجيع أو نقطة عند الإجابة الصحيحة"];
+var $=function(i){return document.getElementById(i)};
+var sel=null,n=0;
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+function say(t,c){$("fb").textContent=t;$("fb").className="fb "+(c||"")}
+function place(k,slot){
+ if(sel===null){say("اختر بطاقة معنى أولًا.","bad");return}
+ if(sel==k){
+  slot.classList.add("done");slot.classList.remove("over");slot.querySelector(".m").textContent=P[k][1];
+  var p=document.querySelector('.pick[data-k="'+k+'"]');p.classList.add("gone");sel=null;n++;
+  $("pb").style.width=(n/P.length*100)+"%";
+  say(n==P.length?"أحسنت! أنهيت كل الروابط.":"صحيح!","ok");
+ }else{
+  slot.classList.add("shake");setTimeout(function(){slot.classList.remove("shake")},600);
+  say("ليس هذا المعيار. جرّب معيارًا آخر.","bad");
+ }
+}
+function build(){
+ n=0;sel=null;$("pb").style.width="0";say("");
+ var s=$("slots"),p=$("picks");s.innerHTML="";p.innerHTML="";
+ P.forEach(function(x,k){
+  var d=document.createElement("div");d.className="slot";d.innerHTML="<b></b><span class=\"m\">أفلت البطاقة هنا</span>";d.firstChild.textContent=x[0];
+  d.onclick=function(){if(!d.classList.contains("done"))place(k,d)};
+  d.ondragover=function(e){e.preventDefault();d.classList.add("over")};
+  d.ondragleave=function(){d.classList.remove("over")};
+  d.ondrop=function(e){e.preventDefault();d.classList.remove("over");if(!d.classList.contains("done")){sel=+e.dataTransfer.getData("text/plain");place(k,d)}};
+  s.appendChild(d)});
+ shuffle(P.map(function(_,k){return k})).forEach(function(k){
+  var b=document.createElement("button");b.className="pick";b.draggable=true;b.dataset.k=k;b.textContent=P[k][1];
+  b.onclick=function(){document.querySelectorAll(".pick").forEach(function(o){o.classList.remove("sel")});b.classList.add("sel");sel=k;say("الآن المس المعيار المناسب.")};
+  b.ondragstart=function(e){e.dataTransfer.setData("text/plain",k);sel=k};
+  p.appendChild(b)});
+}
+$("reset").onclick=build;
+build();
+var h=$("todo");
+T.forEach(function(t){var l=document.createElement("label");l.className="ck";var c=document.createElement("input");c.type="checkbox";var s=document.createElement("span");s.textContent=t;l.appendChild(c);l.appendChild(s);h.appendChild(l)});
+</script>
+</body>
+</html>
